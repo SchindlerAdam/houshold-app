@@ -29,3 +29,17 @@ func (userService *UserService) Save(user *model.CreateUser) (*model.User, error
 	return createdUser, nil
 
 }
+
+func (userService *UserService) Update(id int, updateUser *model.UpdatedUser) (*model.User, error) {
+	validationError := validator.ValidateUpdatedUser(updateUser)
+	if validationError != nil {
+		log.Printf("Validation error: %v", validationError)
+		return nil, validationError
+	}
+
+	updatedUser, err := userService.repository.Update(id, updateUser)
+	if err != nil {
+		return nil, err
+	}
+	return updatedUser, nil
+}

@@ -40,6 +40,7 @@ func registerUserRoutes(router *gin.Engine, db *sql.DB) {
 	userHandler := handler.NewUserHandler(userService)
 
 	router.POST("/user", userHandler.CreateUser)
+	router.PATCH("/user/:id", userHandler.UpdateUser)
 }
 
 func createDB() *sql.DB {

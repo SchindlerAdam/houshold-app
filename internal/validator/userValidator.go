@@ -30,6 +30,33 @@ func ValidateUser(userModel *model.CreateUser) error {
 
 }
 
+func ValidateUpdatedUser(updateUserModel *model.UpdatedUser) error {
+	if updateUserModel.Name != nil && *updateUserModel.Name == "" {
+		return errors.New("Name field cannot be empty!")
+	}
+	if updateUserModel.Email != nil {
+		validateEmailError := validateEmail(*updateUserModel.Email)
+		if validateEmailError != nil {
+			return validateEmailError
+		}
+	}
+	if updateUserModel.Mobile != nil {
+		validateMobilePhoneNumberError := validateMobileNumber(*updateUserModel.Mobile)
+		if validateMobilePhoneNumberError != nil {
+			return validateMobilePhoneNumberError
+		}
+	}
+	if updateUserModel.House != nil {
+		validateHouseNumbersError := validateHouseNumbers(*updateUserModel.House)
+		if validateHouseNumbersError != nil {
+			return validateHouseNumbersError
+		}
+	}
+
+	return nil
+
+}
+
 func validateFieldAreNonNull(userModel *model.CreateUser) error {
 	if userModel.Name == "" || userModel.Email == "" || userModel.Mobile == "" || userModel.House == "" {
 		return errors.New("Fields cannot be empty!")
