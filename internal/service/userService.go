@@ -1,0 +1,31 @@
+package service
+
+import (
+	"houshold-app/internal/model"
+	"houshold-app/internal/repository"
+	"houshold-app/internal/validator"
+	"log"
+)
+
+type UserService struct {
+	repository *repository.UserRepository
+}
+
+func NewUserService(userRepository *repository.UserRepository) *UserService {
+	return &UserService{userRepository}
+}
+
+func (userService *UserService) Save(user *model.CreateUser) (*model.User, error) {
+	validationError := validator.ValidateUser(user)
+	if validationError != nil {
+		log.Printf("Validation error: %v", validationError)
+		return nil, validationError
+	}
+
+	createdUser, err := userService.repository.Create(user)
+	if err != nil {
+		return nil, err
+	}
+	return createdUser, nil
+
+}
