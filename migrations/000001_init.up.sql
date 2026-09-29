@@ -1,13 +1,10 @@
 CREATE SCHEMA IF NOT EXISTS household_app;
 
-SET search_path TO household_app;
-
-CREATE TABLE IF NOT EXISTS users (
+CREATE TABLE IF NOT EXISTS household_app.users (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
-    mobile VARCHAR(20),
-    house VARCHAR(100),
+    mobile VARCHAR(20) NOT NULL,
+    house VARCHAR(100) NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
-

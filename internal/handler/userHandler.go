@@ -42,7 +42,7 @@ func (userHandler *UserHandler) CreateUser(context *gin.Context) {
 }
 
 func (userHandler *UserHandler) UpdateUser(context *gin.Context) {
-	var updateUser model.UpdatedUser
+	var updateUser model.UpdateUser
 
 	if err := context.ShouldBindJSON(&updateUser); err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{
@@ -68,6 +68,40 @@ func (userHandler *UserHandler) UpdateUser(context *gin.Context) {
 	}
 
 	context.JSON(http.StatusOK, updatedUser)
+}
+
+func (userHandler *UserHandler) GetAllUsers(context *gin.Context) {
+	users, err := userHandler.UserService.GetAll()
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	context.JSON(http.StatusOK, users)
+}
+
+func (userHandler *UserHandler) DeleteUser(context *gin.Context) {
+	id, err := getIdFromContext(context)
+	if err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{
+			"error": "Invalid user ID",
+		})
+		return
+	}
+
+	err = userHandler.UserService.Delete(id)
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	context.JSON(http.StatusOK, gin.H{
+		"message": fmt.Sprintf("User with ID %d has been deleted", id),
+	})
 }
 
 func getIdFromContext(context *gin.Context) (int, error) {

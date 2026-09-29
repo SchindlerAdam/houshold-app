@@ -14,8 +14,8 @@ func NewUserRepository(db *sql.DB) *UserRepository {
 	return &UserRepository{db: db}
 }
 
-func (repository UserRepository) Create(user *model.CreateUser) (*model.User, error) {
-	var createdUser model.User
+func (repository UserRepository) Create(user *model.CreateUser) (*model.UserResponse, error) {
+	var createdUser model.UserResponse
 	err := repository.db.QueryRow(
 		`INSERT INTO household_app.users (name, email, mobile, house)
 		 VALUES ($1, $2, $3, $4)
@@ -39,9 +39,9 @@ func (repository UserRepository) Create(user *model.CreateUser) (*model.User, er
 	return &createdUser, nil
 }
 
-func (repository UserRepository) Update(id int, updateUser *model.UpdatedUser) (*model.User, error) {
+func (repository UserRepository) Update(id int, updateUser *model.UpdateUser) (*model.UserResponse, error) {
 	userById, err := repository.GetById(id)
-	
+
 	if updateUser.Name != nil && *updateUser.Name != "" {
 		userById.Name = *updateUser.Name
 	}
@@ -51,7 +51,7 @@ func (repository UserRepository) Update(id int, updateUser *model.UpdatedUser) (
 	if updateUser.Mobile != nil && *updateUser.Mobile != "" {
 		userById.Mobile = *updateUser.Mobile
 	}
-	if updateUser.House != nil  {
+	if updateUser.House != nil {
 		userById.House = *updateUser.House
 	}
 	err = repository.db.QueryRow(
@@ -80,8 +80,8 @@ func (repository UserRepository) Update(id int, updateUser *model.UpdatedUser) (
 
 }
 
-func (repository UserRepository) GetById(id int) (*model.User, error) {
-	var user model.User
+func (repository UserRepository) GetById(id int) (*model.UserResponse, error) {
+	var user model.UserResponse
 	err := repository.db.QueryRow(
 		`SELECT id, name, email, mobile, house FROM household_app.users WHERE id = $1`,
 		id,
@@ -97,4 +97,51 @@ func (repository UserRepository) GetById(id int) (*model.User, error) {
 	}
 	log.Printf("User has been retrieved: %v", user)
 	return &user, nil
+}
+
+func (repository UserRepository) GetAll() (*[]model.UserResponse, error) {
+	rows, err := repository.db.Query(
+		`SELECT id, name, email, mobile, house FROM household_app.users WHERE is_deleted = FALSE`,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var users []model.UserResponse
+	for rows.Next() {
+		var user model.UserResponse
+		err := rows.Scan(
+			&user.Id,
+			&user.Name,
+			&user.Email,
+			&user.Mobile,
+			&user.House,
+		)
+		if err != nil {
+			return nil, err
+		}
+		users = append(users, user)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+	return &users, nil
+}
+
+func (repository UserRepository) Delete(id int) error {
+	user, err := repository.GetById(id)
+	if err != nil {
+		return err
+	}
+
+	_, err = repository.db.Exec(
+		`UPDATE household_app.users SET is_deleted = TRUE WHERE id = $1`,
+		user.Id,
+	)
+	if err != nil {
+		return err
+	}
+	log.Printf("User has been deleted: %v", user)
+	return nil
 }

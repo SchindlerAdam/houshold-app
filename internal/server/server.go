@@ -45,6 +45,8 @@ func registerUserRoutes(router *gin.Engine, db *sql.DB) {
 
 	router.POST("/user", userHandler.CreateUser)
 	router.PATCH("/user/:id", userHandler.UpdateUser)
+	router.GET("/user", userHandler.GetAllUsers)
+	router.DELETE("/user/:id", userHandler.DeleteUser)
 }
 
 func registerCustomValidators() {
