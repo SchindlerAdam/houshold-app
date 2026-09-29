@@ -7,11 +7,14 @@ import (
 	"houshold-app/internal/handler"
 	"houshold-app/internal/repository"
 	"houshold-app/internal/service"
+	"houshold-app/internal/validators"
 	"log"
 	"os"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
+	"github.com/go-playground/validator/v10"
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/joho/godotenv"
 )
@@ -20,6 +23,7 @@ func StartApp() {
 	loadEnvValues()
 	router := gin.Default()
 	db := createDB()
+	registerCustomValidators()
 	initializeApplication(router, db)
 	router.Run("localhost:8080")
 }
@@ -41,6 +45,12 @@ func registerUserRoutes(router *gin.Engine, db *sql.DB) {
 
 	router.POST("/user", userHandler.CreateUser)
 	router.PATCH("/user/:id", userHandler.UpdateUser)
+}
+
+func registerCustomValidators() {
+	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
+		v.RegisterValidation("isValidHouseNumber", validators.IsValidHouseNumber)
+	}
 }
 
 func createDB() *sql.DB {

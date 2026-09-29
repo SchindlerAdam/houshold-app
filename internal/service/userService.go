@@ -3,8 +3,6 @@ package service
 import (
 	"houshold-app/internal/model"
 	"houshold-app/internal/repository"
-	"houshold-app/internal/validator"
-	"log"
 )
 
 type UserService struct {
@@ -16,12 +14,6 @@ func NewUserService(userRepository *repository.UserRepository) *UserService {
 }
 
 func (userService *UserService) Save(user *model.CreateUser) (*model.User, error) {
-	validationError := validator.ValidateUser(user)
-	if validationError != nil {
-		log.Printf("Validation error: %v", validationError)
-		return nil, validationError
-	}
-
 	createdUser, err := userService.repository.Create(user)
 	if err != nil {
 		return nil, err
@@ -31,12 +23,6 @@ func (userService *UserService) Save(user *model.CreateUser) (*model.User, error
 }
 
 func (userService *UserService) Update(id int, updateUser *model.UpdatedUser) (*model.User, error) {
-	validationError := validator.ValidateUpdatedUser(updateUser)
-	if validationError != nil {
-		log.Printf("Validation error: %v", validationError)
-		return nil, validationError
-	}
-
 	updatedUser, err := userService.repository.Update(id, updateUser)
 	if err != nil {
 		return nil, err
